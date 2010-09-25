@@ -1,0 +1,42 @@
+.card_ad {
+  width: 11em;
+}
+
+#count {
+  margin-left: 1em;
+}
+
+.scan {
+  width: 100px;
+}
+
+.metadata {
+  width: 8em;
+  font-family: verdana;
+}
+
+.card_text {
+  width: 40em;
+}
+
+.data {
+  width: 40em;
+}
+
+.card_name {
+  font-style: italic;
+  font-weight: bold;
+  font-family: verdana;
+}
+
+.full_type {
+  font-family: arial;
+}
+
+.scan img {
+  border: 0;
+}
+
+.defense {
+  margin-left: 1em;
+}

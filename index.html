@@ -1,0 +1,85 @@
+
+<?php
+  include 'util.php';
+  epic_tome_header($_SERVER['PHP_SELF']);
+?>
+
+<h2 class='clear'>Card Search</h2>
+
+<form action="display.php">
+<div><p>Card Name</p><input type="text" value="" name="card_name"/></div>
+<div><p>Card Text</p><input type="text" value="" name="text"/></div>
+
+  <div class='left'>
+    <p>Alignment</p>
+    <select multiple="multiple" size="5" name="alignment[]">
+    <option>
+    </option><option>Evil</option>
+    <option>Good</option>
+    <option>Unaligned</option>
+    <option>Wild</option>
+    </select>
+  </div>
+  <div class='left'>
+    <p>Rarity</p>
+    <select multiple="multiple" size="5" name="rarity[]">
+    <option>
+    </option><option>Common</option>
+    <option>Rare</option>
+    <option value="ultra">Ultra Rare</option>
+    <option>Prize</option>
+    </select>
+  </div>
+  <div class='left'>
+    <p>Set</p>
+    <select multiple="multiple" size="5" name="set_name[]">
+    <option>
+    </option><option value="core">Core Set</option>
+    <option value="prize">Prize</option>
+    <option value="tw">Time Wars</option>
+    <option value="precon">Precon</option>
+    </select>
+  </div>
+
+<div class='clear'>
+  <div class='left '>
+    <p>Origin</p>
+    <select multiple="multiple" size="4" name="origin[]">
+    <option>
+    </option><option>Natural</option>
+    <option>Magical</option>
+    <option>Constructed</option>
+    </select>
+  </div>
+  <div class='left'>
+    <p>Type</p>
+    <select multiple="multiple" size="4" name="card_type[]">
+    <option>
+    </option><option>Champion</option>
+    <option>Object</option>
+    <option>Event</option>
+    </select>
+  </div>
+</div>
+<div class='clear'>
+  <div class='left'>
+  <p>Cost</p>
+  <img alt="action" src="icons/action.png"/> <input type="checkbox" value="action" name="cost[]"/><img alt="free" src="icons/free.png"/> <input type="checkbox" value="free" name="cost[]"/>
+  </div>
+
+  <div class='left'>
+  <p>Speed</p>
+  <img alt="build" src="icons/build.png"/> <input type="checkbox" value="build" name="speed[]"/><img alt="paced" src="icons/paced.png"/> <input type="checkbox" value="paced" name="speed[]"/><img alt="fast" src="icons/fast.png"/> <input type="checkbox" value="fast" name="speed[]"/>
+  </div>
+</div>
+<div class='clear'>
+  Gift: <input class='valign' type="checkbox" value="true" name="gift"/>
+  Non-Gift: <input class='valign' type="checkbox" value="false" name="gift"/>
+  Instantaneous: <input class='valign' type="checkbox" value="true" name="instantaneous[]"/>
+  Non-Instantaneous: <input class='valign' type="checkbox" value="false" name="instantaneous[]"/>
+  In Stock: <input class='valign' type="checkbox" value="true" name="instock"/>
+</div>
+ <input type="submit" name="search" value="Search" id="button"/>
+ </form>
+
+<?php epic_tome_footer(false); ?>
