@@ -39,7 +39,7 @@ function formatted_card_text($card) {
 }
 
 function db_connect() {
-  include_once('config.php');
+  include('config.php');
 
   $link = mysql_connect($DB_CONFIG['host'],
                         $DB_CONFIG['user'],
@@ -153,8 +153,11 @@ END;
 echo "</div>";
 
 if ($is_store) {
+
+include('config.php');
+
   echo <<<END
-<script id='googlecart-script' type='text/javascript' src='https://checkout.google.com/seller/gsc/v2_2/cart.js?mid=724071367116412' integration='jscart-wizard' post-cart-to-sandbox='false' currency='USD' productWeightUnits='LB' hide-cart-when-empty="true"></script>
+<script id='googlecart-script' type='text/javascript' src='https://checkout.google.com/seller/gsc/v2_2/cart.js?mid=$MERCHANT_ID' integration='jscart-wizard' post-cart-to-sandbox='false' currency='USD' productWeightUnits='LB' hide-cart-when-empty="true"></script>
 END;
 }
 

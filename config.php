@@ -7,4 +7,7 @@ $DB_CONFIG = array(
   "db" => "epictcg"
 );
 
+$MERCHANT_ID = 724071367116412;
+
 ?>
+
