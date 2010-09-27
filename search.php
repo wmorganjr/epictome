@@ -1,5 +1,7 @@
 <?php
 
+include_once('util.php');
+
 function search_results() {
   if (! ($link = db_connect())) {
     return NULL;
@@ -121,16 +123,4 @@ function bool_to_string($x) {
   }
 }
 
-function db_connect() {
-  $link = mysql_connect('mysql.thespoilsonline.com', 'epictcg', 'epicpass');
-  if (!$link) {
-    return NULL;
-  }
-
-  if (! mysql_select_db("epictcg", $link)) {
-    return NULL;
-  }
-
-  return $link;
-}
 ?>

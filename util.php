@@ -38,6 +38,23 @@ function formatted_card_text($card) {
   return $text;
 }
 
+function db_connect() {
+  include_once('config.php');
+
+  $link = mysql_connect($DB_CONFIG['host'],
+                        $DB_CONFIG['user'],
+                        $DB_CONFIG['pass']);
+  if (!$link) {
+    return NULL;
+  }
+
+  if (! mysql_select_db($DB_CONFIG['db'], $link)) {
+    return NULL;
+  }
+
+  return $link;
+}
+
 function icon($name) {
   return "<img src='icons/$name.png' alt='$name' title='$name' />";
 }

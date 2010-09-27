@@ -1,6 +1,6 @@
 <?php
-  include 'util.php';
-  include 'search.php';
+  include_once 'util.php';
+  include_once 'search.php';
   epic_tome_header($_SERVER['PHP_SELF']);
 ?>
 
