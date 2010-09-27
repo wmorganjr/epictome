@@ -1,6 +1,16 @@
 <?php
 
+include_once('util.php');
+
 header('Content-type: application/json');
+
+$seed = $_GET['seed'];
+
+if (! $seed) {
+  $seed = 0;
+}
+
+srand($seed);
 
 $set_name = $_GET['set_name'];
 
@@ -86,7 +96,7 @@ if ($set_name == 'core') {
 }
 
 
-$query = "SELECT * FROM cards2 WHERE set_name = '$set_name' AND set_number IN (999";
+$query = "SELECT * FROM cards WHERE set_name = '$set_name' AND set_number IN (-1";
 
 foreach ($pack as $set_number) {
   $query .= ", $set_number";
@@ -94,24 +104,12 @@ foreach ($pack as $set_number) {
 
 $query .= ")";
 
-$link = mysql_connect('mysql.thespoilsonline.com', 'epictcg', 'epicpass');
-if (!$link) {
-    header("HTTP/1.0 500 Internal Server Error");
-    die("Could not establish a connection to the server");
+if (! ($link = db_connect())) {
+  die("Database Error");
 }
 
-$db = mysql_select_db("epictcg", $link);
-if (!$db) {
-    header("HTTP/1.0 500 Internal Server Error");
-    die("Could not switch to the epictcg database");
-}
-
-$result = mysql_query($query);
-if (!$result) {
-    header("HTTP/1.0 500 Internal Server Error");
-    $message  = 'Invalid query: ' . mysql_error() . "\n";
-    $message .= 'Whole query: ' . $query;
-    die($message);
+if (! $result = mysql_query($query)) {
+  die("Database Error");
 }
 
 $list = array();
