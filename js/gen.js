@@ -95,17 +95,9 @@ function make_images_draggable() {
   });
 }
 
-function get_url_param(param) {
-  var regex = '[?&]' + param + '=([^&#]*)';
-  var results = (new RegExp(regex)).exec(window.location.href);
-  if (results) return results[1];
-  return '';
-}
-
-var noise = 0;
-
-function open_pack2(set_name) {
-  var url = "gen_pack.php?set_name=" + set_name;
+function open_pack(set_name) {
+  var rand = Math.floor(Math.random() * 2000000);
+  var url = "gen_pack.php?seed=" + rand + "&set_name=" + set_name;
   $.ajax({
     url: url,
 	cache: false,
@@ -122,37 +114,6 @@ function open_pack2(set_name) {
 	      .addClass(card.speed)
 	      .addClass(card.cost)
 	      .attr('name', card.set_number);
-	  });
-	  make_images_draggable();
-	  sort();
-	  count_pool();
-	},
-	error: function(a,b,c) {
-	  $(document.createElement("p"))
-	      .text("There was an error retrieving the pack. Yell at Will.")
-	      .appendTo("#pool");
-	}
-  });
-}
-
-function open_pack(pack) {
-  var booster = "booster3.php?a=" + noise;
-  noise++;
-  if (pack) booster += "&pack=" + pack;
-
-  $.ajax({
-    url: booster,
-	success: function(xml) {
-	  var xmlDoc = xml;
-	  $(xmlDoc).find('card').each(function() {
-	    $(document.createElement("img")).appendTo("#pool").attr({
-	      src: src_from_card_name($(this).find('card_name').text())
-	    }).addClass($(this).find('alignment').text() + " " +
-	                $(this).find('origin').text() + " " +
-		        $(this).find('cost').text() + " " +
-		        $(this).find('card_type').text() + " " +
-		        $(this).find('speed').text() + " card")
-          .attr('name', $(this).find('set_number').text());
 	  });
 	  make_images_draggable();
 	  sort();
@@ -247,22 +208,14 @@ function generate() {
   $("#deck_error").remove();
   $(".card").remove();
 
-  var packs = get_url_param("packs");
-  if (packs) {
-    var split = packs.split(",");
-    for (var i = 0; i < split.length; i++) {
-      open_pack(split[i]);
-    }
-  } else {
-    var num_packs = $("#num_packs_core").val();
-    for (var i = 0; i < num_packs; i++) {
-      open_pack2('core');
-    }
+  var num_packs = $("#num_packs_core").val();
+  for (var i = 0; i < num_packs; i++) {
+    open_pack('core');
+  }
 
-    var num_packs = $("#num_packs_tw").val();
-    for (var i = 0; i < num_packs; i++) {
-      open_pack2('tw');
-    }
+  var num_packs = $("#num_packs_tw").val();
+  for (var i = 0; i < num_packs; i++) {
+    open_pack('tw');
   }
 }
 
@@ -358,9 +311,5 @@ $(function() {
 	sort();
   });
 
-  if (get_url_param("packs")) {
-    $("#generate").attr('disabled', 'disabled');
-    generate();
-  }
 });
 
