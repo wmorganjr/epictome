@@ -6,13 +6,17 @@ var criteria = {
   type : ["champion", "object", "event"]
 };
 
-var MAX_VERT_CARDS = 18;
-
 var card_widths = {
   thumb : 100,
   mid: 125,
   big: 150
 };
+
+var max_cards_per_column = {
+  thumb: 25,
+  mid: 22,
+  big: 18
+}
 
 function card_width() {
   return card_widths[$("#card_size").val()];
@@ -26,26 +30,28 @@ jQuery.fn.sort = function() {
   return this.pushStack(jQuery.makeArray([].sort.apply(this, arguments)));
 }; 
 
-function compare_names(a, b) {
- return parseInt(a.getAttribute('name')) -
-        parseInt(b.getAttribute('name'));
+function compare_set_numbers(a, b) {
+ return parseInt(a.getAttribute('set_number')) -
+        parseInt(b.getAttribute('set_number'));
 }
 
-function sort() {
+function sort_pool() {
   var classes = criteria[$("#sort_criterion").val().toLowerCase()];
+
+  var column_max = max_cards_per_column[$("#card_size").val()];
 
   var x_pos = 0;
   $.each(classes, function(idx, c) {
     var contains_at_least_one_card = false;
     $("#pool ." + c)
-      .sort(compare_names)
+      .sort(compare_set_numbers)
       .each(function(i) {
-        if (i > 0 && i % MAX_VERT_CARDS == 0) {
+        if (i > 0 && i % column_max == 0) {
           x_pos += card_width();
         }
         $(this).css({
           left: x_pos,
-          top: (i % MAX_VERT_CARDS) * grid(),
+          top: (i % column_max) * grid(),
           zIndex: 50 + i
         });
         contains_at_least_one_card = true;
@@ -72,6 +78,18 @@ function make_images_draggable() {
   });
 }
 
+function create_card(card) {
+  $(document.createElement("img"))
+    .attr('src', src_from_card_name(card.card_name))
+    .addClass("card")
+    .addClass(card.alignment)
+    .addClass(card.origin)
+    .addClass(card.card_type)
+    .addClass(card.speed)
+    .addClass(card.cost)
+    .attr('set_number', card.set_number);
+}
+
 function open_pack(set_name) {
   $.getJSON(
     "gen_pack.php", {
@@ -91,7 +109,7 @@ function open_pack(set_name) {
              .attr('name', card.set_number);
           });
           make_images_draggable();
-          sort();
+          sort_pool();
           count_pool();
     });
 }
@@ -99,15 +117,17 @@ function open_pack(set_name) {
 function count_pool() {
   var len = $("#pool img.card").get().length;
   var size = len > 30 ? "light" : len < 30 ? "light" : "ok";
-  $("#pool_count").text(len + '/30').removeClass('heavy light ok').addClass(size);
-
+  $("#pool_count")
+    .text(len + '/30')
+    .removeClass('heavy light ok')
+    .addClass(size);
 }
 
 function force_save() {
   var format = $("#save_format").val();
   var deck = new Object();
   var sb = new Object();
-  $("#pool img").each(function() {
+  $("#pool img.card").each(function() {
     var card_name = card_name_from_src($(this).attr('src'));
     if (deck[card_name]) {
       deck[card_name]++;
@@ -161,7 +181,7 @@ function generate() {
   }
 }
 
-function resize_sb_and_trash() {
+function resize_stacks() {
   $("#sb, #trash").css('width', (card_width() + 4) + "px");
   $("#sb_img, #trash_img").css({
     width: (card_width() + 3) + "px",
@@ -170,38 +190,61 @@ function resize_sb_and_trash() {
   $("#sb").css('right', (card_width() + 4) + "px");
 }
 
+function align_first_in_stacks() {
+  $("#sb .card").first()
+    .css('margin-top', -1 * (card_width() + 3) + "px");
+  $("#trash .card").first()
+    .css('margin-top', -1 * (card_width() + 3) + "px");
+}
+
 function move_card_from_pool(card, dest) {
   if (! dest) {
     dest = $("#sb img.card").length < 15 ? $("#sb") : $("#trash");
   }
 
-  if (dest.find(".card").length > 0) {
-    card.css('margin-top', (card_width() * -1.4 + grid()) + "px")
-  } else {
-    card.css('margin-top', "-112px");
-  }
+  card.css('margin-top', (card_width() * -1.4 + grid()) + "px")
 
   card.appendTo(dest);
 
+  align_first_in_stacks();
+
   count_pool();
+}
+
+function update_for_new_size() {
+  $("img.card").css({
+    height: (card_width() * 1.4) + "px",
+    width: card_width() + "px"
+  });
+
+  $("img.card").each(function() {
+    $(this).attr('src',
+      src_from_card_name(card_name_from_src($(this).attr('src'))));
+  });
+
+  resize_stacks();
+  align_first_in_stacks();
+
+  $("#pool img").draggable('option', 'grid', [grid(), grid()]);
+  sort_pool();
 }
 
 $(function() {
   $("#pool").text("");
 
   $("img.card").live("mouseover", function() {
-    $("#zoom").attr('src', $(this).attr('src').replace(/(thumb|mid|big).jpg/, 'full.jpg'));
+    $("#zoom").attr('src', $(this).attr('src')
+                             .replace(/(thumb|mid|big).jpg/, 'full.jpg'));
   }).live("dblclick", function() {
     move_card_from_pool($(this));
   });
 
   $("#sb img.card, #trash img.card").live("mousedown", function() {
-    var parent = $(this).parent();
     $(this)
       .appendTo("#pool")
       .css({ "margin-top" : "0px",
              "z-index" : 200});
-    parent.find(".card").first().css("margin-top", "-112px");
+    align_first_in_stacks();
     count_pool();
   });
 
@@ -214,14 +257,14 @@ $(function() {
     }
   });
 
-  resize_sb_and_trash();
+  resize_stacks();
 
   $("#generate").live("click", function() {
     generate();
   });
 
   $("#sort_button, #sort_criterion option").live("click", function() {
-    sort();
+    sort_pool();
   });
 
   $("#save").live("click", function() {
@@ -247,20 +290,7 @@ $(function() {
   });
 
   $("#card_size").change(function() {
-    $("img.card").css({
-    height: (card_width() * 1.4) + "px",
-      width: card_width() + "px"
-    });
-
-    $("img.card").each(function() {
-      $(this).attr('src',
-        src_from_card_name(card_name_from_src($(this).attr('src'))));
-    });
-
-    resize_sb_and_trash();
-
-    $("#pool img").draggable('option', 'grid', [grid(), grid()]);
-    sort();
+    update_for_new_size();
   });
 });
 
