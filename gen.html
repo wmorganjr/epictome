@@ -6,17 +6,14 @@
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
   <link rel="stylesheet" href="css/undohtml.css" type="text/css" />
-  <link rel="stylesheet" href="css/front.css" type="text/css" />
 
   <style type="text/css">
-    body {
-      width: auto;
-    }
+    .clear { clear: both }
     .ui-state-highlight {
-      background-color: LightGrey;
+      background-color: lightGrey;
     }
     .ui-state-hover {
-      background-color: DarkGrey;
+      background-color: darkGray;
     }
     #left_col {
       margin-left: 5px;
@@ -24,25 +21,23 @@
       float: left;
       width: 249px;
     }
-    #sb img, #trash img, #pool img {
+    #pool img {
       position: absolute;
     }
+    #sb .card, #trash .card {
+      margin-top: -112px;
+    }
     #pool {
-      display: inline;
+      margin-left: 259px;
       position: relative;
       z-index: 100;
-      width: 1px;
     }
     #trash, #sb {
-      position: relative;
-      display: inline;
-      float: right;
+      position: absolute;
+      right: 0px;
       height: 100%;
       width: 129px;
       border: 1px solid black;
-    }
-    #card_box {
-      height: 100%;
     }
     #pool_count {
       font-size: 30px;
@@ -62,22 +57,8 @@
 </head>
 
 <body>
-<div id="container">
-
-<h1>
-<a href="/"><img src="site.png" alt="Epic Tome" /></a>
-<span>POWER TOOLS FOR EPIC TCG</span>
-</h1>
-
-<ul>
-<li><a class="current" href="/">SEARCH</a></li>
-<li><a href="buy.html">BUY</a></li>
-<li><a href="sealed.html">SEALED</a></li>
-<li><a href="draft.html">DRAFT</a></li>
-<li><a href="about.html">ABOUT</a></li>
-</ul>
-<h2 class="clear">Sealed Deck Generator</h2>
   <div id='left_col'>
+    <label id='pool_count' class='light'>0/30</label>
     <p>
     <label>Core Set Packs</label>
     <select id='num_packs_core'>
@@ -87,7 +68,6 @@
       <option>3</option>
       <option>4</option>
     </select>
-    <label id='pool_count' class='light'>0/30</label>
     </p>
     <p>
     <label>Time Wars Packs</label>
@@ -133,17 +113,14 @@
       Yell at him.
     </div>
     <div id='trash'>
-      <img id='trash_img' src='trash.png' alt='trash' />
+      <img id='trash_img' class='icon' src='trash.png' alt='trash' />
     </div>
     <div id='sb'>
-      <img id='sb_img' src='sb.png' alt='sb' />
+      <img id='sb_img' class='icon' src='sb.png' alt='sb' />
     </div>
-  </div>
-  <div id='footer' class='clear'><p>The Epic Trading Card Game and all card images are Copyright 2009 Epic Trading Card Game and redistributed with permission. </p> <p>All other content is Copyright 2010 Will Morgan unless other specified.  </p> </div>
-  </div>
-
-<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.1/jquery.min.js"></script>
-  <script type="text/javascript" src="js/jquery-ui.js"></script>
+    <div class='clear'></div>
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.4.2/jquery.min.js"></script>
+  <script type="text/javascript" src="js/jquery-ui-1.8.5.custom.min.js"></script>
   <script type="text/javascript" src="js/gen.js"></script>
 
 </body>

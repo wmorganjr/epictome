@@ -7,9 +7,6 @@ var criteria = {
 };
 
 var MAX_VERT_CARDS = 18;
-var VERT_GRID = 25;
-var HOZ_GRID = 25;
-var CARD_WIDTH = 125;
 
 var card_widths = {
   thumb : 100,
@@ -17,78 +14,61 @@ var card_widths = {
   big: 150
 };
 
+function card_width() {
+  return card_widths[$("#card_size").val()];
+}
+
+function grid() {
+  return card_width() / 5;
+}
+
 jQuery.fn.sort = function() {
   return this.pushStack(jQuery.makeArray([].sort.apply(this, arguments)));
 }; 
 
+function compare_names(a, b) {
+ return parseInt(a.getAttribute('name')) -
+        parseInt(b.getAttribute('name'));
+}
+
 function sort() {
   var classes = criteria[$("#sort_criterion").val().toLowerCase()];
 
-  var z_index = 50;
   var x_pos = 0;
-  for (var i = 0; i < classes.length; i++) {
-    var c = classes[i];
-    var flag = false;
-    var cards = 0;
-    $("#pool ." + c).sort(function(a, b) {
-       return parseInt(a.getAttribute('name')) -
-              parseInt(b.getAttribute('name'));
-    }).each(function() {
-      if (cards > MAX_VERT_CARDS) {
-        cards = 0;
-        x_pos += CARD_WIDTH;
-      }
-      $(this).css({
-        position: 'absolute',
-        left: x_pos,
-        top: cards * VERT_GRID,
-        zIndex: z_index
+  $.each(classes, function(idx, c) {
+    var contains_at_least_one_card = false;
+    $("#pool ." + c)
+      .sort(compare_names)
+      .each(function(i) {
+        if (i > 0 && i % MAX_VERT_CARDS == 0) {
+          x_pos += card_width();
+        }
+        $(this).css({
+          left: x_pos,
+          top: (i % MAX_VERT_CARDS) * grid(),
+          zIndex: 50 + i
+        });
+        contains_at_least_one_card = true;
       });
-      flag = true;
-      cards++;
-      z_index++;
-    });
-    if (flag) {
-      x_pos += CARD_WIDTH + HOZ_GRID;
-    }
-  }
+
+      if (contains_at_least_one_card) {
+        x_pos += card_width() + grid();
+      }
+  });
 }
 
 function src_from_card_name(card_name) {
-  return "scans/" + card_name + "." + $("#card_size").val() + ".jpg";
+  return "scans/" + escape(card_name) + "." + $("#card_size").val() + ".jpg";
 }
+
 function card_name_from_src(src) {
-  return /scans\/(.*)\.(thumb|mid|big)\.jpg/.exec(src)[1];
+  return /scans\/(.*)\.(thumb|mid|big)\.jpg/.exec(unescape(src))[1];
 }
 
 function make_images_draggable() {
   $("#pool img").draggable({
-      stack: {
-        group: 'img',
-        min: 50
-      },
-      grid: [HOZ_GRID, VERT_GRID],
-      stop: function(event, ui) {
-        var img = $(this)[0];
-        var center = img.offsetLeft + CARD_WIDTH / 2 + 250;
-
-        var sb_left = $("#sb")[0].offsetLeft;
-        var sb_right = sb_left + CARD_WIDTH;
-
-        if (center > sb_left && center < sb_right) {
-          $(this).appendTo("#sb");
-          restack();
-        }
-
-        var trash_left = $("#trash")[0].offsetLeft;
-        var trash_right = trash_left + CARD_WIDTH;
-
-        if (center > trash_left && center < trash_right) {
-          $(this).appendTo("#trash");
-          restack();
-        }
-
-      }
+    stack: "img",
+    grid: [grid(), grid()]
   });
 }
 
@@ -114,23 +94,6 @@ function open_pack(set_name) {
           sort();
           count_pool();
     });
-}
-
-function restack() {
-  count_pool();
-  $("#trash, #sb").each(function() {
-    var zIndex = 50;
-    var count = 0;
-    $(this).children("img").each(function() {
-      $(this).css({
-        left: "0px",
-        top: count * VERT_GRID,
-        zIndex: zIndex
-      });
-      count++;
-      zIndex++;
-    });
-  });
 }
 
 function count_pool() {
@@ -198,34 +161,60 @@ function generate() {
   }
 }
 
+function resize_sb_and_trash() {
+  $("#sb, #trash").css('width', (card_width() + 4) + "px");
+  $("#sb_img, #trash_img").css({
+    width: (card_width() + 3) + "px",
+    height: (card_width() + 3) + "px"
+  });
+  $("#sb").css('right', (card_width() + 4) + "px");
+}
+
+function move_card_from_pool(card, dest) {
+  if (! dest) {
+    dest = $("#sb img.card").length < 15 ? $("#sb") : $("#trash");
+  }
+
+  if (dest.find(".card").length > 0) {
+    card.css('margin-top', (card_width() * -1.4 + grid()) + "px")
+  } else {
+    card.css('margin-top', "-112px");
+  }
+
+  card.appendTo(dest);
+
+  count_pool();
+}
+
 $(function() {
   $("#pool").text("");
 
   $("img.card").live("mouseover", function() {
     $("#zoom").attr('src', $(this).attr('src').replace(/(thumb|mid|big).jpg/, 'full.jpg'));
   }).live("dblclick", function() {
-    var dest = $("#sb img.card").length < 15 ? "#sb" : "#trash";
-    $(this).appendTo(dest);
-    restack();
+    move_card_from_pool($(this));
   });
 
   $("#sb img.card, #trash img.card").live("mousedown", function() {
-    $(this).appendTo($("#pool")).css('zIndex', 100);
-    restack();
+    var parent = $(this).parent();
+    $(this)
+      .appendTo("#pool")
+      .css({ "margin-top" : "0px",
+             "z-index" : 200});
+    parent.find(".card").first().css("margin-top", "-112px");
+    count_pool();
   });
 
   $("#trash, #sb").droppable({
     accept: "#pool img",
-    activeClass: 'ui-state-highlight',
-    hoverClass: 'ui-state-hover',
+    activeClass: "ui-state-highlight",
+    hoverClass: "ui-state-hover",
     drop: function(event, ui) {
-    $(ui.draggable).draggable('option', 'cancel', '#sb img, #trash img')
-      .appendTo($(this));
-      // Droppable doesn't automatically clear the sb highlight
-      $("#sb").removeClass('ui-state-highlight');
-      restack();
+      move_card_from_pool($(ui.draggable), $(this));
     }
   });
+
+  resize_sb_and_trash();
 
   $("#generate").live("click", function() {
     generate();
@@ -238,6 +227,7 @@ $(function() {
   $("#save").live("click", function() {
     var msg = deck_error();
     if (msg) {
+      $("#deck_error, #force_button").html("");
       $(document.createElement("p"))
         .text(msg)
         .attr('id', 'deck_error')
@@ -257,28 +247,20 @@ $(function() {
   });
 
   $("#card_size").change(function() {
-    var command = $(this).val();
-      CARD_WIDTH = card_widths[$(this).val()];
-      $("img.card").css({
-      height: (CARD_WIDTH * 1.4) + "px",
-        width: CARD_WIDTH + "px"
-      });
+    $("img.card").css({
+    height: (card_width() * 1.4) + "px",
+      width: card_width() + "px"
+    });
 
-      $("img.card").each(function() {
-        $(this).attr('src',
-          src_from_card_name(card_name_from_src($(this).attr('src'))));
-      });
+    $("img.card").each(function() {
+      $(this).attr('src',
+        src_from_card_name(card_name_from_src($(this).attr('src'))));
+    });
 
-        VERT_GRID = CARD_WIDTH / 5;
-        HOZ_GRID = VERT_GRID;
-        $("#sb, #trash").css('width', (CARD_WIDTH + 4) + "px");
-        $("#sb_img, #trash_img").css({
-          width: (CARD_WIDTH + 3) + "px",
-          height: (CARD_WIDTH + 3) + "px"
-        });
-        $("#pool img").draggable('option', 'grid', [HOZ_GRID, VERT_GRID]);
-        restack();
-        sort();
+    resize_sb_and_trash();
+
+    $("#pool img").draggable('option', 'grid', [grid(), grid()]);
+    sort();
   });
 });
 
