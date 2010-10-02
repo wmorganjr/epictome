@@ -9,8 +9,7 @@
   }
 
   header("Content-Type: application/octet-stream");
-  header('Content-Disposition: attachment; filename="Sealed ' . $dt . $ext);
-
+  header("Content-Disposition: attachment; filename=\"Sealed $dt$ext\"");
 
   if ($format == "Magic Workstation") {
     echo("// Deck file for Magic Workstation (http://www.magicworkstation.com)\r\n");
